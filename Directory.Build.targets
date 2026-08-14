@@ -1,0 +1,48 @@
+<Project>
+  <!--
+    Workaround for the .NET 10 SDK loading EVERY Roslyn leg of multi-leg analyzer
+    packages. The SDK advertises $(SupportsRoslynComponentVersioning)==true and is
+    supposed to select exactly one leg per package that matches the host compiler
+    version, but NuGet's ResolvePackageFileConflicts cannot pick a winner ("Could not
+    determine winner due to equal file and assembly versions"), so all legs reach the
+    compiler. Each loaded leg runs the package's source generator, every generated
+    symbol is emitted multiple times, and the build fails with thousands of
+    duplicate-definition errors (CS0101/CS0111/CS0229/CS0579/CS0757, plus CS8894/CS0535
+    cascades). Affected packages observed here: Microsoft.Windows.CsWin32
+    (roslyn4.11+roslyn5.0), CommunityToolkit.Mvvm (roslyn4.0/4.3/4.12+roslyn5.0),
+    Microsoft.Windows.CsWinRT (cs/roslyn4.8+4.12), Microsoft.Extensions.Logging.Abstractions
+    (roslyn3.11/4.0/4.4).
+
+    This target keeps a single leg per package:
+      - packages that ship a roslyn5.0 leg (the compiler in the .NET 10 SDK) keep it
+        and drop every other leg;
+      - packages without a roslyn5.0 leg keep their highest leg (hardcoded below).
+
+    No-op on hosts that already select a single leg correctly (e.g. VS 2026 MSBuild),
+    and no-op for classic (non-SDK-style) projects, which are handled by each
+    package's own fallback targets.
+  -->
+  <Target Name="SelectSingleAnalyzerRoslynLeg" BeforeTargets="_HandlePackageFileConflicts" Condition="'$(SupportsRoslynComponentVersioning)' == 'true'">
+    <ItemGroup>
+      <!-- NuGet package ids that ship a roslyn5.0 analyzer leg. Note: avoid
+           backslashes in these strings - MSBuild property functions treat \a, \r,
+           \n etc. as .NET escapes, so '\roslyn5.0' would never match. -->
+      <_PackageWithRoslyn50 Include="@(Analyzer->'%(NuGetPackageId)')" Condition="$([System.String]::new('%(Analyzer.FullPath)').Contains('roslyn5.0'))" />
+    </ItemGroup>
+    <ItemGroup>
+      <!-- Generic rule: for packages with a roslyn5.0 leg, drop every other leg -->
+      <Analyzer Remove="@(Analyzer)"
+        Condition="$([System.String]::new('%(Analyzer.FullPath)').Contains('roslyn'))
+                   and !$([System.String]::new('%(Analyzer.FullPath)').Contains('roslyn5.0'))
+                   and '@(_PackageWithRoslyn50->Contains('%(Analyzer.NuGetPackageId)'))' != ''" />
+
+      <!-- Packages without a roslyn5.0 leg: keep only their highest leg -->
+      <Analyzer Remove="@(Analyzer)"
+        Condition="'%(Analyzer.NuGetPackageId)' == 'Microsoft.Windows.CsWinRT' and $([System.String]::new('%(Analyzer.FullPath)').Contains('roslyn4.8'))" />
+      <Analyzer Remove="@(Analyzer)"
+        Condition="'%(Analyzer.NuGetPackageId)' == 'Microsoft.Extensions.Logging.Abstractions'
+                   and ($([System.String]::new('%(Analyzer.FullPath)').Contains('roslyn3.11'))
+                        or $([System.String]::new('%(Analyzer.FullPath)').Contains('roslyn4.0')))" />
+    </ItemGroup>
+  </Target>
+</Project>

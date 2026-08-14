@@ -4,6 +4,7 @@
     <TargetWindowsVersion>10.0.26100.0</TargetWindowsVersion>
     <MinimalWindowsVersion>10.0.26100.0</MinimalWindowsVersion>
     <WindowsTargetFramework>$(TargetFrameworkVersion)-windows$(TargetWindowsVersion)</WindowsTargetFramework>
+    <Platform Condition="'$(Platform)' == '' or '$(Platform)' == 'AnyCPU'">x64</Platform>
     <LangVersion>preview</LangVersion>
     <Features>strict</Features>
   </PropertyGroup>
