@@ -1395,8 +1395,8 @@ public static class AppsStage
 			("Installing DualSenseY", async () => await Task.Delay(500), () => DualSenseY == true),
 			("Cleaning up DualSenseY files", async () => { string path = Path.Combine(Path.GetTempPath(), "x64-release.zip"); foreach (Process process in ProcessesHelper.GetLockingProcesses(path)) { process.Kill(); process.WaitForExit(); } RegistryHelper.RunAs(RegistryHelper.Identity.TrustedInstaller, () => File.Delete(path)); }, () => DualSenseY == true),
 
-			// download ds4windows
-		("Downloading DS4Windows", async () => await DownloadHelper.Download(JsonDocument.Parse(await new HttpClient { DefaultRequestHeaders = { { "User-Agent", "AutoOS" } } }.GetStringAsync("https://api.github.com/repos/ds4windowsapp/DS4Windows/releases/tags/ryochan7")).GetProperty("assets").EnumerateArray().First(asset => (asset.GetProperty("name").GetString() ?? "").EndsWith(".zip")).GetProperty("browser_download_url").GetString() ?? "", Path.GetTempPath(), "ds4windows.zip", reporter: reporter), () => DS4Windows == true),
+		// download ds4windows
+		("Downloading DS4Windows", async () => await DownloadHelper.Download(JsonDocument.Parse(await new HttpClient { DefaultRequestHeaders = { { "User-Agent", "AutoOS" } } }.GetStringAsync("https://api.github.com/repos/ds4windowsapp/DS4Windows/releases")).RootElement.EnumerateArray().First(release => !release.GetProperty("prerelease").GetBoolean() && release.GetProperty("assets").EnumerateArray().Any(asset => (asset.GetProperty("name").GetString() ?? "").StartsWith("ds4windows-") && (asset.GetProperty("name").GetString() ?? "").EndsWith(".zip"))).GetProperty("assets").EnumerateArray().First(asset => (asset.GetProperty("name").GetString() ?? "").StartsWith("ds4windows-") && (asset.GetProperty("name").GetString() ?? "").EndsWith(".zip")).GetProperty("browser_download_url").GetString() ?? "", Path.GetTempPath(), "ds4windows.zip", reporter: reporter), () => DS4Windows == true),
 
 		// install ds4windows
 		("Installing DS4Windows", async () => await ExtractHelper.Extract(Path.Combine(Path.GetTempPath(), "ds4windows.zip"), Path.Combine(Path.GetTempPath(), "DS4Windows-Extract")), () => DS4Windows == true),
