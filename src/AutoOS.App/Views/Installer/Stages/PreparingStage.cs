@@ -92,6 +92,7 @@ public static partial class PreparingStage
 	public static bool FACEIT;
 	public static bool FACEITAC;
 	public static bool Eden;
+	public static bool Playnite;
 
 	public static bool AppleMusic;
 	public static bool Tidal;
@@ -517,6 +518,7 @@ public static partial class PreparingStage
 			FACEIT = (localSettings.Values["Launchers"]?.ToString()?.Contains("FACEIT") ?? false);
 			FACEITAC = (localSettings.Values["Launchers"]?.ToString()?.Contains("FACEIT AC") ?? false);
 			Eden = (localSettings.Values["Launchers"]?.ToString()?.Contains("Eden") ?? false);
+			Playnite = (localSettings.Values["Launchers"]?.ToString()?.Contains("Playnite") ?? false);
 
 			AppleMusic = (localSettings.Values["Music"]?.ToString()?.Contains("Apple Music") ?? false);
 			Tidal = (localSettings.Values["Music"]?.ToString()?.Contains("TIDAL") ?? false);

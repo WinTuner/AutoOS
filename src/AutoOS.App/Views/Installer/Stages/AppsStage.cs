@@ -60,6 +60,7 @@ public class ApplicationSelection
 	public bool FACEIT { get; set; }
 	public bool FACEITAC { get; set; }
 	public bool Eden { get; set; }
+	public bool Playnite { get; set; }
 	public bool AppleMusic { get; set; }
 	public bool Tidal { get; set; }
 	public bool Qobuz { get; set; }
@@ -224,6 +225,7 @@ public static class AppsStage
 		bool FACEIT = selection?.FACEIT ?? PreparingStage.FACEIT;
 		bool FACEITAC = selection?.FACEITAC ?? PreparingStage.FACEITAC;
 		bool Eden = selection?.Eden ?? PreparingStage.Eden;
+		bool Playnite = selection?.Playnite ?? PreparingStage.Playnite;
 
 		bool AppleMusic = selection?.AppleMusic ?? PreparingStage.AppleMusic;
 		bool Tidal = selection?.Tidal ?? PreparingStage.Tidal;
@@ -1053,6 +1055,16 @@ public static class AppsStage
 			("Installing Eden", async () => RegistryHelper.SetValue(RegistryHelper.Identity.TrustedInstaller, @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Eden", "DisplayIcon", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Eden", "eden.exe"), RegistryValueKind.String), () => Eden == true),
 			("Installing Eden", async () => RegistryHelper.SetValue(RegistryHelper.Identity.TrustedInstaller, @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Eden", "Publisher", "Eden Emulator Project", RegistryValueKind.String), () => Eden == true),
 			("Cleaning up Eden files", async () => { string path = Path.Combine(Path.GetTempPath(), "Eden-Windows-amd64-clang-pgo.zip"); foreach (Process process in ProcessesHelper.GetLockingProcesses(path)) { process.Kill(); process.WaitForExit(); } RegistryHelper.RunAs(RegistryHelper.Identity.TrustedInstaller, () => File.Delete(path)); }, () => Eden == true),
+
+			// download playnite
+			("Downloading Playnite", async () => await DownloadHelper.Download(JsonDocument.Parse(await new HttpClient { DefaultRequestHeaders = { { "User-Agent", "AutoOS" } } }.GetStringAsync("https://api.github.com/repos/JosefNemec/Playnite/releases")).RootElement.EnumerateArray().First(release => !release.GetProperty("prerelease").GetBoolean() && release.GetProperty("assets").EnumerateArray().Any(asset => (asset.GetProperty("name").GetString() ?? "").StartsWith("Playnite") && (asset.GetProperty("name").GetString() ?? "").EndsWith(".exe"))).GetProperty("assets").EnumerateArray().First(asset => (asset.GetProperty("name").GetString() ?? "").StartsWith("Playnite") && (asset.GetProperty("name").GetString() ?? "").EndsWith(".exe")).GetProperty("browser_download_url").GetString() ?? "", Path.GetTempPath(), "Playnite-setup.exe", reporter: reporter), () => Playnite == true),
+
+			// install playnite
+			("Installing Playnite", async () => await Process.Start(new ProcessStartInfo { FileName = Path.Combine(Path.GetTempPath(), "Playnite-setup.exe"), Arguments = "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART" , WindowStyle = ProcessWindowStyle.Hidden })!.WaitForExitAsync(), () => Playnite == true),
+			("Cleaning up Playnite files", async () => { string path = Path.Combine(Path.GetTempPath(), "Playnite-setup.exe"); foreach (Process process in ProcessesHelper.GetLockingProcesses(path)) { process.Kill(); process.WaitForExit(); } RegistryHelper.RunAs(RegistryHelper.Identity.TrustedInstaller, () => File.Delete(path)); }, () => Playnite == true),
+
+			// remove playnite desktop shortcut
+			("Removing Playnite desktop shortcut", async () => File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Playnite.lnk")), () => Playnite == true),
 
 			// download dolby access
 			("Downloading Dolby Access", async () => await StoreHelper.Download("DolbyLaboratories.DolbyAccess_rz1tebttyb220", 1, reporter: reporter), () => AppleMusic == true),

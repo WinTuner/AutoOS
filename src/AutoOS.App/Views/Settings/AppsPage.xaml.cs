@@ -81,7 +81,8 @@ public sealed partial class AppsPage : Page
 			new() { Text = "FiveM", ImageSource = "ms-appx:///Assets/FluentIcons/Apps/Launchers/FiveM.jpg", IsInstalled = File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FiveM", "FiveM.exe")) },
 			new() { Text = "FACEIT", ImageSource = "ms-appx:///Assets/FluentIcons/Apps/Launchers/FACEIT.png", IsInstalled = File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FACEIT", "FACEIT.exe")) },
 			new() { Text = "FACEIT AC", ImageSource = "ms-appx:///Assets/FluentIcons/Apps/Launchers/FACEITAC.png", IsInstalled = File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "FACEIT AC", "faceitclient.exe")) },
-			new() { Text = "Eden", ImageSource = "ms-appx:///Assets/FluentIcons/Pages/Settings/Eden.png", IsInstalled = File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Eden", "eden.exe")) }
+			new() { Text = "Eden", ImageSource = "ms-appx:///Assets/FluentIcons/Pages/Settings/Eden.png", IsInstalled = File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Eden", "eden.exe")) },
+			new() { Text = "Playnite", ImageSource = "ms-appx:///Assets/FluentIcons/Apps/Launchers/Playnite.png", IsInstalled = File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Playnite", "Playnite.DesktopApp.exe")) }
 		};
 		foreach (GridViewItem item in launchersList.Where(item => !item.IsInstalled))
 			launchersItems.Add(item);
@@ -308,6 +309,7 @@ public sealed partial class AppsPage : Page
 		selection.FACEIT = selectedLaunchers.Contains("FACEIT");
 		selection.FACEITAC = selectedLaunchers.Contains("FACEIT AC");
 		selection.Eden = selectedLaunchers.Contains("Eden");
+		selection.Playnite = selectedLaunchers.Contains("Playnite");
 
 		var selectedMusicItems = Music.SelectedItems.Cast<GridViewItem>().ToList();
 		var selectedMusic = selectedMusicItems.Select(item => item.Text).ToList();

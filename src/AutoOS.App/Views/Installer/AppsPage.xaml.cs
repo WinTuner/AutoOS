@@ -83,7 +83,8 @@ public sealed partial class AppsPage : Page
 			new() { Text = "FiveM", ImageSource = "ms-appx:///Assets/FluentIcons/Apps/Launchers/FiveM.jpg" },
 			new() { Text = "FACEIT", ImageSource = "ms-appx:///Assets/FluentIcons/Apps/Launchers/FACEIT.png" },
 			new() { Text = "FACEIT AC", ImageSource = "ms-appx:///Assets/FluentIcons/Apps/Launchers/FACEITAC.png" },
-			new() { Text = "Eden", ImageSource = "ms-appx:///Assets/FluentIcons/Pages/Settings/Eden.png" }
+			new() { Text = "Eden", ImageSource = "ms-appx:///Assets/FluentIcons/Pages/Settings/Eden.png" },
+			new() { Text = "Playnite", ImageSource = "ms-appx:///Assets/FluentIcons/Apps/Launchers/Playnite.png" }
 		};
 
 		Music.ItemsSource = new List<GridViewItem>
